@@ -3,34 +3,30 @@ const path = require('path')
 const { getUserIndex } = require('./users')
 
 const ACTION = {
-  "leave": 0,
-  "draw": 1,
-  "double": 2
+  leave: 0,
+  draw: 1,
+  double: 2,
 }
 
 const CARDS_TYPE = {
-  "as": 0,
-  "normal": 1,
-  "joker": 2
+  as: 0,
+  normal: 1,
+  joker: 2,
 }
 
-/**
- * Star bonus defined as 5 gold.
- */
-const STAR_BONUS = 5
 const COUNTDOWN = 1000 * 2 // milliseconds
 
 /**
  * Default multiplicator for the game.
  */
- const BLACKJACK = 21
+const BLACKJACK = 21
 const BLACKJACK_VALUE = 50
 const MAX_JUDGE_VALUE = 17
 const STATE = {
-  "bet": 0,
-  "play": 1,
-  "judge": 2,
-  "end": 3
+  bet: 0,
+  play: 1,
+  judge: 2,
+  end: 3,
 }
 
 const NB_ROUND = 3
@@ -46,12 +42,12 @@ const CARDS_JSON = JSON.parse(
  */
 const CARDS = CARDS_JSON.cards
 
-const shuffleDeck = deck => {
+const shuffleDeck = (deck) => {
   for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const temp = deck[i];
-    deck[i] = deck[j];
-    deck[j] = temp;
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = deck[i]
+    deck[i] = deck[j]
+    deck[j] = temp
   }
 }
 
@@ -68,20 +64,18 @@ class Game {
   constructor(users, options) {
     this.users = users
     this.round = 1
-    this.state = STATE["bet"]
+    this.state = STATE['bet']
 
-    this.cards = []
+    this.cards = []
     this.score = 0
-    this.countdown = null;
-    this.timer = null;
+    this.countdown = null
+    this.timer = null
 
     this.deck = [...CARDS]
-    this.deckIndexes = Array.from(
-      Array(this.deck.length), (_, index) => index
-    );
-    shuffleDeck(this.deckIndexes);
+    this.deckIndexes = Array.from(Array(this.deck.length), (_, index) => index)
+    shuffleDeck(this.deckIndexes)
 
-    this.firstPlayer = Math.floor(Math.random() * (this.users.length - 1));
+    this.firstPlayer = Math.floor(Math.random() * (this.users.length - 1))
     this.currentPlayer = this.firstPlayer
 
     // nbRound, nbPlayer, x2Stars, duplicate, mult
@@ -103,22 +97,21 @@ class Game {
     const user = this.users[index]
 
     return user.cards[-1]
-
   }
 
   newRound() {
-    if(this.round === NB_ROUND) {
-      return true;
+    if (this.round === NB_ROUND) {
+      return true
     }
 
     this.round++
-    this.state = STATE["bet"]
+    this.state = STATE['bet']
     this.firstPlayer = (this.firstPlayer + 1) % this.users.length
     this.currentPlayer = this.firstPlayer
-    shuffleDeck(this.deckIndexes);
+    shuffleDeck(this.deckIndexes)
 
-    this.countdown = null;
-    this.timer = null;
+    this.countdown = null
+    this.timer = null
 
     for (let i = 0; i < this.users.length; i++) {
       this.users[i].checked = false
@@ -138,12 +131,12 @@ class Game {
   nextPlayer() {
     this.currentPlayer = (this.currentPlayer + 1) % this.users.length
 
-    if(this.currentPlayer === this.firstPlayer) {
+    if (this.currentPlayer === this.firstPlayer) {
       this.state++
-      if(this.state === STATE["play"]) {
-        this.users.map(usr => usr.checked = false)
+      if (this.state === STATE['play']) {
+        this.users.map((usr) => (usr.checked = false))
         for (let i = 0; i < this.users.length; i++) {
-          for(let c = 0; c < 2; c++)
+          for (let c = 0; c < 2; c++)
             this.users[i].cards.push(this.deck[this.deckIndexes.pop()])
           this.users[i].score = this.cardsScore(this.users[i].cards)
         }
@@ -166,15 +159,14 @@ class Game {
     user.cards.push(this.deck[this.deckIndexes.pop()])
     user.score = this.cardsScore(user.cards)
 
-    if(user.score > BLACKJACK) {
+    if (user.score > BLACKJACK) {
       user.alive = false
       user.checked = true
     }
   }
 
   doubleCard(user) {
-    if(user.cards.length > 2)
-      return
+    if (user.cards.length > 2) return
 
     user.cards.push(this.deck[this.deckIndexes.pop()])
     user.score = this.cardsScore(user.cards)
@@ -182,52 +174,47 @@ class Game {
     user.bet *= 2
     user.checked = true
 
-    if(user.score > BLACKJACK)
-      user.alive = false
+    if (user.score > BLACKJACK) user.alive = false
   }
 
   leave(user) {
-    if(!user.alive || user.checked)
-      return
+    if (!user.alive || user.checked) return
 
     user.checked = true
   }
 
   updateJudge() {
-    if(this.score >= MAX_JUDGE_VALUE)
-      return true
-    
+    if (this.score >= MAX_JUDGE_VALUE) return true
+
     const card = this.deck[this.deckIndexes.pop()]
     this.cards.push(card)
     this.score = this.cardsScore(this.cards)
 
-    if(this.score >= MAX_JUDGE_VALUE)
-      return true
+    if (this.score >= MAX_JUDGE_VALUE) return true
 
-      return false
+    return false
   }
 
-
   blackjack(cards) {
-    if(cards.length !== 2)
-      return false;  
+    if (cards.length !== 2) return false
     return cards[0].score + cards[1].score === BLACKJACK
   }
 
   cardsScore(cards) {
-    let score_ = 0;
+    let score_ = 0
 
     let nbAsCards = cards.filter(
-      card => card.type === CARDS_TYPE["as"]).length
+      (card) => card.type === CARDS_TYPE['as']
+    ).length
 
-    cards.map(card => score_ += card.score)
+    cards.map((card) => (score_ += card.score))
 
-    while(nbAsCards > 0) {
-      if(score_ > BLACKJACK) {
+    while (nbAsCards > 0) {
+      if (score_ > BLACKJACK) {
         score_ -= 10
-        nbAsCards--;
+        nbAsCards--
       } else {
-        break;
+        break
       }
     }
 
@@ -235,34 +222,29 @@ class Game {
   }
 
   updateGame() {
-    const blackjacked = this.blackjack(this.cards);
-    for(let i = 0; i < this.users.length; i++) {
-      if(!this.users[i].alive) continue
+    const blackjacked = this.blackjack(this.cards)
+    for (let i = 0; i < this.users.length; i++) {
+      if (!this.users[i].alive) continue
 
       const user = this.users[i]
       const userBJ = this.blackjack(user.cards)
       let gold = null
-      if(this.score > BLACKJACK) {
+      if (this.score > BLACKJACK) {
         gold = user.bet * 2
       } else {
-        if(blackjacked) {
+        if (blackjacked) {
           gold = userBJ ? user.bet : 0
         } else {
-          gold = 
-            user.score > this.score || userBJ ? 
-              user.bet * 2 :
-                user.score === this.score ?
-                  user.bet : 0
+          gold =
+            user.score > this.score || userBJ
+              ? user.bet * 2
+              : user.score === this.score
+              ? user.bet
+              : 0
         }
       }
 
-      user.currentGold = gold ? 
-        userBJ ? 
-          gold + BLACKJACK_VALUE 
-          : 
-          gold 
-        : 
-        gold
+      user.currentGold = gold ? (userBJ ? gold + BLACKJACK_VALUE : gold) : gold
       user.gold += user.currentGold
       user.alive = gold ? true : false
     }
@@ -340,10 +322,9 @@ class Game {
       cards: this.cards,
       score: this.score,
       currentPlayer: this.users[this.currentPlayer].id,
-      state: this.state
+      state: this.state,
     }
   }
-
 
   /**
    * Check if the game has a user.
@@ -364,11 +345,10 @@ class Game {
   }
 
   checkAllLeaving() {
-    for(let u = 0; u < this.users.length; u++) {
-      if(this.users[u].action === CONTINUE)
-        return false;
+    for (let u = 0; u < this.users.length; u++) {
+      if (this.users[u].action === CONTINUE) return false
     }
-    return true;
+    return true
   }
 
   /**
@@ -388,25 +368,25 @@ class Game {
     const index = getUserIndex(this.users, id)
     const user = this.users[index]
 
-    switch(action) {
-      case ACTION["leave"]:
+    switch (action) {
+      case ACTION['leave']:
         this.leave(user)
-        break;
-      case ACTION["draw"]:
+        break
+      case ACTION['draw']:
         this.drawCard(user)
-        break;
-      case ACTION["double"]:
+        break
+      case ACTION['double']:
         this.doubleCard(user)
-        break;
+        break
       default:
         console.log('Error: Inapropriate action.')
-        break;
+        break
     }
 
-    if(user.checked)
+    if (user.checked)
       this.currentPlayer = (this.currentPlayer + 1) % this.users.length
 
-    return !this.users.filter(usr => usr.checked === false).length
+    return !this.users.filter((usr) => usr.checked === false).length
   }
 
   /**
@@ -462,7 +442,7 @@ class Game {
     const now = new Date()
     this.timer = {
       start: now.getTime(),
-      end: now.getTime() + COUNTDOWN
+      end: now.getTime() + COUNTDOWN,
     }
   }
 

@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const socketIO = require('socket.io')
 
-const ginho = require('./core/ginho')
+const blackjack = require('./core/blackjack')
 
 require('dotenv').config()
 
@@ -38,14 +38,14 @@ if (ENV === 'production') {
 }
 
 io.on('connection', (socket) => {
-  listen(io, socket, 'lobby:create', ginho.createLobby.bind(ginho))
-  listen(io, socket, 'lobby:check', ginho.checkLobby.bind(ginho))
-  listen(io, socket, 'lobby:join', ginho.joinLobby.bind(ginho))
-  listen(io, socket, 'game:start', ginho.startGame.bind(ginho))
-  listen(io, socket, 'game:update-bet', ginho.updateBet.bind(ginho))
-  listen(io, socket, 'game:update-action', ginho.updateAction.bind(ginho))
-  listen(io, socket, 'game:restart', ginho.restartGame.bind(ginho))
-  listen(io, socket, 'disconnect', ginho.removeUser.bind(ginho))
+  listen(io, socket, 'lobby:create', blackjack.createLobby.bind(blackjack))
+  listen(io, socket, 'lobby:check', blackjack.checkLobby.bind(blackjack))
+  listen(io, socket, 'lobby:join', blackjack.joinLobby.bind(blackjack))
+  listen(io, socket, 'game:start', blackjack.startGame.bind(blackjack))
+  listen(io, socket, 'game:update-bet', blackjack.updateBet.bind(blackjack))
+  listen(io, socket, 'game:update-action', blackjack.updateAction.bind(blackjack))
+  listen(io, socket, 'game:restart', blackjack.restartGame.bind(blackjack))
+  listen(io, socket, 'disconnect', blackjack.removeUser.bind(blackjack))
 })
 
 function listen(io, socket, type, callback) {

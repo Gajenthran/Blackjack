@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import queryString from 'query-string'
-import { Spinner } from 'react-bootstrap'
 
-import socket from './../../config/socket'
+import socket from '../../config/socket'
 
-import Lobby from './../Lobby/Lobby'
-import Profile from './../Profile/Profile'
-import Rank from './../Rank/Rank'
-import Game from './../Game/Game'
-import Navbar from './../Navbar/Navbar'
-
-/**
- * Ginho states with 3 states: game, lobby and rank.
- */
+import Lobby from '../Lobby/Lobby'
+import Profile from '../Profile/Profile'
+import Game from '../Game/Game'
+// import Rank from '../Rank/Rank'
 
 const PROFILE_STATE = 0
 const LOBBYSTATE = 1
 const GAMESTATE = 2
-const RANKSTATE = 3
+// const RANKSTATE = 3
 
-/**
- * Ginho component with 3 states:
- * lobby component, game component
- * and rank component.
- *
- * @param {object} location - get query string
- */
-const Ginho = ({ location }) => {
+const Blackjack = ({ location }) => {
   const [gameState, setGameState] = useState({
     gold: 0,
     round: 1,
@@ -46,35 +33,35 @@ const Ginho = ({ location }) => {
     // Firefox
     if (document.mozFullScreenEnabled) {
       if (!document.mozFullScreenElement) {
-        elem.mozRequestFullScreen();
+        elem.mozRequestFullScreen()
       } else {
-        document.mozCancelFullScreen();
+        document.mozCancelFullScreen()
       }
     }
 
     if (document.fullscreenElement) {
       if (!document.fullscreenElement) {
-        elem.requestFullscreen();
+        elem.requestFullscreen()
       } else {
-        document.exitFullscreen();
+        document.exitFullscreen()
       }
     }
 
     // Safari
     if (document.webkitFullscreenEnabled) {
       if (!document.webkitFullscreenElement) {
-        elem.webkitRequestFullscreen();
+        elem.webkitRequestFullscreen()
       } else {
-        document.webkitExitFullscreen();
+        document.webkitExitFullscreen()
       }
     }
 
     // Edge
     if (document.msFullscreenEnabled) {
       if (!document.msFullscreenElement) {
-        elem.msRequestFullscreen();
+        elem.msRequestFullscreen()
       } else {
-        document.msExitFullscreen();
+        document.msExitFullscreen()
       }
     }
   }
@@ -125,7 +112,6 @@ const Ginho = ({ location }) => {
     }
   }, [location.search, lobbyChecked])
 
-
   /**
    * Create a new game.
    */
@@ -157,7 +143,7 @@ const Ginho = ({ location }) => {
   /**
    * Update users actions.
    */
-   useEffect(() => {
+  useEffect(() => {
     socket.on('game:update-bet-response', ({ users, gameState }) => {
       setGameState((prevGameState) => ({ ...prevGameState, ...gameState }))
       setUser(users.find((u) => u.id === socket.id))
@@ -176,19 +162,17 @@ const Ginho = ({ location }) => {
       setGameState((prevGameState) => ({
         ...prevGameState,
         ...gameState,
-      }));
+      }))
     })
   }, [])
 
-
   useEffect(() => {
     socket.on('game:update-judge', ({ gameState }) => {
-        setGameState((prevGameState) => ({
-          ...prevGameState,
-          ...gameState,
-        }))
-      }
-    )
+      setGameState((prevGameState) => ({
+        ...prevGameState,
+        ...gameState,
+      }))
+    })
   }, [])
 
   /**
@@ -222,7 +206,7 @@ const Ginho = ({ location }) => {
       setTimeout(() => {
         setUsers(users)
         setWinner(users[0])
-      }, 1000);
+      }, 1000)
     })
   }, [])
 
@@ -234,13 +218,6 @@ const Ginho = ({ location }) => {
 
   return (
     <>
-      {
-        !(
-          document.mozFullScreenElement || document.fullscreenElement || 
-          document.webkitFullscreenElement || document.msFullscreenElement
-          || playState === GAMESTATE
-        ) && <Navbar/>
-      }
       {playState === PROFILE_STATE ? (
         <Profile location={location} />
       ) : playState === LOBBYSTATE ? (
@@ -255,19 +232,11 @@ const Ginho = ({ location }) => {
           onFullscreen={onFullscreen}
           winner={winner}
         />
-      ) : playState === RANKSTATE ? (
-        <Rank socket={socket} users={users} />
       ) : (
-        <div className="spinner-container">
-          <Spinner
-            className="users-spinner--loading"
-            animation="border"
-            role="status"
-          />
-        </div>
+        <div></div>
       )}
     </>
-  );
+  )
 }
 
-export default Ginho
+export default Blackjack

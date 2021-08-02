@@ -1,7 +1,7 @@
 {
-  "name": "ginho",
+  "name": "blackjack",
   "version": "1.0.0",
-  "description": "Ginho app.",
+  "description": "Blackjack app.",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gajenthran/ginho.git"
+    "url": "git+https://github.com/Gajenthran/blackjack.git"
   },
   "keywords": [
     "react"
   ],
   "author": "PANCHALINGAMOORTHY Gajenthran",
   "license": "ISC",
-  "homepage": "https://github.com/Gajenthran/ginho#readme",
+  "homepage": "https://github.com/Gajenthran/blackjack#readme",
   "devDependencies": {
     "concurrently": "^3.6.1",
     "moment": "2.24.0",

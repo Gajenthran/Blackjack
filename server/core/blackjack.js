@@ -109,8 +109,9 @@ class Ginho {
     }
 
     socket.join(user.room)
-
-    io.to(user.room).emit('lobby:create-response', { user })
+    setTimeout(() => {
+      io.to(socket.id).emit('lobby:create-response', { user })
+    }, 300)
   }
 
   checkLobby(io, socket, { room }) {
@@ -157,7 +158,7 @@ class Ginho {
     })
 
     socket.broadcast.to(user.room).emit('lobby:join-response-all', {
-      users: this.users
+      users: this.users,
     })
   }
 
@@ -230,10 +231,10 @@ class Ginho {
     io.to(user.room).emit('game:update-action-response', {
       users: game.getUsers(),
       gameState: game.getGameState(),
-      card: game.getLastCard(socket.id)
+      card: game.getLastCard(socket.id),
     })
 
-    if(allChecked) {
+    if (allChecked) {
       game.resetCountdown()
       game.clearCountdown()
       const timer = game.getTimer()
@@ -241,39 +242,38 @@ class Ginho {
       game.setCountdown(() => {
         io.to(user.room).emit('game:countdown-tick', game.getTimer())
         const done = game.updateJudge()
-  
+
         io.to(user.room).emit('game:update-judge', {
           users: game.getUsers(),
           gameState: game.getGameState(),
         })
-        if(done) {
+        if (done) {
           game.updateGame()
           game.clearCountdown()
           io.to(user.room).emit('game:update-game', {
             users: game.getUsers(),
             gameState: game.getGameState(),
-          });
+          })
 
           setTimeout(() => {
             const end = game.newRound()
-            if(end) {
+            if (end) {
               game.rankUsers()
               io.to(user.room).emit('game:end-game', {
                 users: game.getUsers(),
                 gameState: game.getGameState(),
-              });
+              })
             } else {
               io.to(user.room).emit('game:new-round', {
                 users: game.getUsers(),
                 gameState: game.getGameState(),
-              });
+              })
             }
-          }, 3000);
+          }, 3000)
         }
       }, timer.end - timer.start)
     }
   }
-
 
   updateBet(io, socket, { bet }) {
     const index = getUserIndex(this.users, socket.id)
@@ -305,7 +305,6 @@ class Ginho {
       gameState,
     })
   }
-
 
   /**
    * Check if it is the end of the game. If it

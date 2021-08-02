@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import orImg from './../../assets/img/or.png'
 import argentImg from './../../assets/img/argent.png'
 import bronzeImg from './../../assets/img/bronze.png'
-import goldImg from './../../assets/img/gold.png'
+import tokenImg from './../../assets/img/token.png'
 
 import './Rank.css'
 
@@ -49,7 +49,7 @@ const Rank = ({ socket, users }) => {
               <div> {user.name} </div>
               <div className="ranking-user-gold">
                 {' '}
-                <img src={goldImg} alt="gold" /> <span> {user.gold} </span>{' '}
+                <img src={tokenImg} alt="gold" /> <span> {user.gold} </span>{' '}
               </div>
             </div>
           ) : index === 1 ? (
@@ -61,7 +61,7 @@ const Rank = ({ socket, users }) => {
               <div> {user.name} </div>
               <div className="ranking-user-gold">
                 {' '}
-                <img src={goldImg} alt="gold" /> <span> {user.gold} </span>{' '}
+                <img src={tokenImg} alt="gold" /> <span> {user.gold} </span>{' '}
               </div>
             </div>
           ) : index === 2 ? (
@@ -73,7 +73,7 @@ const Rank = ({ socket, users }) => {
               <div> {user.name} </div>
               <div className="ranking-user-gold">
                 {' '}
-                <img src={goldImg} alt="gold" /> <span> {user.gold} </span>{' '}
+                <img src={tokenImg} alt="gold" /> <span> {user.gold} </span>{' '}
               </div>
             </div>
           ) : (
@@ -82,7 +82,7 @@ const Rank = ({ socket, users }) => {
               <div> {user.name} </div>
               <div className="ranking-user-gold">
                 {' '}
-                <img src={goldImg} alt="gold" /> <span> {user.gold} </span>{' '}
+                <img src={tokenImg} alt="gold" /> <span> {user.gold} </span>{' '}
               </div>
             </div>
           )

@@ -1,57 +1,40 @@
-import React, { useEffect, useState } from 'react'
-import RangeSlider from 'react-bootstrap-range-slider'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import { Fade } from 'react-bootstrap'
-import { Redirect } from 'react-router-dom'
+import React, { useState } from 'react'
+import Slider from 'rc-slider'
 
 import socket from './../../config/socket'
 
+import 'rc-slider/assets/index.css'
+
 import './Lobby.css'
-import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css'
+import { IMGS } from '../constants/images'
 
-/**
- * Lobby component to manage the game options and
- * start the game.
- *
- * @param {object} lobbyUsers - lobby users
- * @param {string} [lobbyUsers.name] - username
- * @param {string} [lobbyUsers.room] - user room
- * @param {array} users - others users in the room
- */
 const Lobby = ({ user, users }) => {
-  const [hoverRules, setHoverRules] = useState(false)
-  const [hoverUsers, setHoverUsers] = useState(false)
   const [nbRound, setNbRound] = useState(3)
-  const [nbPlayer, setNbPlayer] = useState(2)
-  const [x2Stars, setx2Stars] = useState(false)
-  const [bet, setBet] = useState(false)
-  const [duplicate, setDuplicate] = useState(false)
+  const [nbPlayer, setNbPlayer] = useState(4)
+  const [x2Stars, setX2Stars] = useState(45)
+  const [bet, setBet] = useState(true)
+  const [duplicate, setDuplicate] = useState(true)
   const [mult, setMult] = useState(0)
-  const [roundOptions, setRoundOptions] = useState(false)
-  const [x2Options, setX2Options] = useState(false)
-  const [playerOptions, setPlayerOptions] = useState(false)
-  const [dupOptions, setDupOptions] = useState(false)
-  const [multOptions, setMultOptions] = useState(false)
-  const [betOptions, setBetOptions] = useState(false)
+  const [invitedMessage, setInvitedMessage] = useState(false)
 
-  useEffect(() => {
-    socket.on('lobby:create-response', ({ user }) => {
-      if (user === undefined || !(user.roomId || user.name)) return <Redirect to="/" />
+  const startGame = () => {
+    socket.emit('game:start', {
+      nbRound,
+      nbPlayer,
+      x2Stars,
+      bet,
+      duplicate,
+      mult,
     })
-  })
-
-  /**
-   * Start the game and emit options game to the server.
-   *
-   * @param {object} event - event
-   */
-  const startGame = (event) => {
-    socket.emit('game:start', { nbRound, nbPlayer, x2Stars, duplicate, mult })
   }
 
   const copyToClipboard = (e) => {
     navigator.clipboard.writeText(window.location.href)
     e.target.focus()
+    setInvitedMessage(true)
+    setTimeout(() => {
+      setInvitedMessage(false)
+    }, 2000)
   }
 
   /**
@@ -59,33 +42,30 @@ const Lobby = ({ user, users }) => {
    */
   const renderUsers = () => {
     return (
-      <div
-        onMouseEnter={() => setHoverUsers(true)}
-        onMouseLeave={() => setHoverUsers(false)}
-        className="lobby--container lobby-users-list"
-      >
-        <h3> JOUEURS</h3>
-        <Fade in={hoverUsers}>
-          <h5> ({users.length}) </h5>
-        </Fade>
+      <div className="lobby-users-list">
+        <h3> JOUEURS - {users.length} </h3>
         <div className="lobby-users--list-row">
-          <div className="lobby-users--infos-list" key={socket.id}>
-            <div className="lobby-users--name">
-              <img src={user.img} alt="avatar" />
-              {user.name}
-            </div>
-          </div>
-          {users.map(
-            (user) =>
-              user.id !== socket.id && (
-                <div className="lobby-users--infos-list" key={user.id}>
-                  <div className="lobby-users--name">
-                    <img src={user.img} alt="avatar" />
-                    {user.name}
-                  </div>
+          {users.map((user, index) => (
+            <div className="lobby-users--infos-list" key={user.id}>
+              <div className="lobby-users--name">
+                <div className="lobby-users--avatar">
+                  {index === users.length - 1 && (
+                    <img
+                      src={IMGS['crown']}
+                      className="lobby-user-crown"
+                      alt="avatar"
+                    />
+                  )}
+                  <img
+                    src={user.img}
+                    className="lobby-user-avatar"
+                    alt="avatar"
+                  />
                 </div>
-              )
-          )}
+                <p> {user.name} </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     )
@@ -96,154 +76,119 @@ const Lobby = ({ user, users }) => {
    */
   const renderOptions = () => {
     return (
-      <div
-        onMouseEnter={() => setHoverRules(true)}
-        onMouseLeave={() => setHoverRules(false)}
-        className="lobby--container lobby-users-options"
-      >
+      <div className="lobby-users-options">
         <h3> OPTIONS </h3>
-        <Fade in={hoverRules}>
-          <h5> DE JEU </h5>
-        </Fade>
         <div className="lobby-users-options-list">
-          <div
-            onMouseEnter={() => setRoundOptions(true)}
-            onMouseLeave={() => setRoundOptions(false)}
-          >
-            <h6> TOURS </h6>
-            <Fade in={roundOptions}>
-              <div className="lobby-users-options-desc">
-                Nombre de tours par partie
-              </div>
-            </Fade>
-            <RangeSlider
-              min={2}
-              max={5}
-              value={nbRound}
-              onChange={(e) => setNbRound(Number(e.target.value))}
-            />
-          </div>
-          <div
-            onMouseEnter={() => setPlayerOptions(true)}
-            onMouseLeave={() => setPlayerOptions(false)}
-          >
-            <h6> JOUEURS</h6>
-            <Fade in={playerOptions}>
-              <div className="lobby-users-options-desc">
-                Nombre de joueurs max. dans une partie
-              </div>
-            </Fade>
-            <RangeSlider
-              min={2}
+          <div className="lobby-users-options-element">
+            <h6> JOUEURS MAX </h6>
+            <Slider
+              min={4}
               max={6}
               value={nbPlayer}
-              onChange={(e) => setNbPlayer(Number(e.target.value))}
+              onChange={(v) => setNbPlayer(v)}
+              marks={{ 4: '4', 5: '5', 6: '6' }}
             />
           </div>
-          <div
-            onMouseEnter={() => setX2Options(true)}
-            onMouseLeave={() => setX2Options(false)}
-          >
-            <h6> x2 ÉTOILES </h6>
-            <Fade in={x2Options}>
-              <div className="lobby-users-options-desc">
-                Les étoiles ne rapportent pas forcément 5 ors...
-              </div>
-            </Fade>
-            <BootstrapSwitchButton
-              onlabel={' '}
-              offlabel={' '}
-              checked={x2Stars}
-              onstyle="outline-primary"
-              offstyle="outline-secondary"
-              width={130}
-              height={5}
-              onChange={() => setx2Stars(!x2Stars)}
+          <div className="lobby-users-options-element">
+            <h6> NOMBRES DE TOURS </h6>
+            <Slider
+              min={2}
+              max={8}
+              value={nbRound}
+              onChange={(v) => setNbRound(v)}
+              marks={{ 2: '2', 3: '3', 5: '5', 8: '8' }}
             />
           </div>
-          <div
-            onMouseEnter={() => setBetOptions(true)}
-            onMouseLeave={() => setBetOptions(false)}
-          >
-            <h6> BET </h6>
-            <Fade in={betOptions}>
-              <div className="lobby-users-options-desc">
-                Parier sur l'apparition d'or dans la partie
-              </div>
-            </Fade>
-            <BootstrapSwitchButton
-              onlabel={' '}
-              offlabel={' '}
-              checked={x2Stars}
-              onstyle="outline-primary"
-              offstyle="outline-secondary"
-              width={130}
-              height={5}
-              onChange={() => setBet(!bet)}
-            />
-          </div>
-          <div
-            onMouseEnter={() => setDupOptions(true)}
-            onMouseLeave={() => setDupOptions(false)}
-          >
-            <h6> PAS DE DOUBLONS </h6>
-            <Fade in={dupOptions}>
-              <div className="lobby-users-options-desc">
-                Dès qu&apos;une carte piège est piochée, c&apos;est perdu
-              </div>
-            </Fade>
-            <BootstrapSwitchButton
-              onlabel={' '}
-              offlabel={' '}
-              checked={duplicate}
-              onstyle="outline-primary"
-              offstyle="outline-secondary"
-              width={130}
-              height={5}
-              onChange={() => setDuplicate(!duplicate)}
-            />
-          </div>
-          <div
-            onMouseEnter={() => setMultOptions(true)}
-            onMouseLeave={() => setMultOptions(false)}
-          >
+          <div className="lobby-users-options-element">
             <h6> MULTIPLICATEUR </h6>
-            <Fade in={multOptions}>
-              <div className="lobby-users-options-desc">
-                Plus vous avancez, plus vous serez récompensé
-              </div>
-            </Fade>
-            <RangeSlider
+            <Slider
               min={0}
               max={4.0}
               step={0.5}
               value={mult}
-              onChange={(e) => setMult(Number(e.target.value))}
+              onChange={(v) => setMult(v)}
+              marks={{ 0: '0', 1.0: '1', 2.0: '2', 3.0: '3', 4.0: '4' }}
             />
+          </div>
+          <div className="lobby-users-options-element">
+            <h6> X2 ETOILES </h6>
+            <div className="toggle-lobby-container" style={{ top: 0 }}>
+              <input
+                type="checkbox"
+                id="toggle-lobby-qcm"
+                onClick={() => setX2Stars(!x2Stars)}
+              />
+              <label
+                className="lobby-toggle-label"
+                htmlFor="toggle-lobby-qcm"
+              ></label>
+            </div>
+          </div>
+          <div className="lobby-users-options-element">
+            <h6> BET </h6>
+            <div className="toggle-lobby-container" style={{ top: 0 }}>
+              <input
+                type="checkbox"
+                id="toggle-lobby-streak"
+                onClick={() => setBet(!bet)}
+              />
+              <label
+                className="lobby-toggle-label"
+                htmlFor="toggle-lobby-streak"
+              ></label>
+            </div>
+          </div>
+          <div className="lobby-users-options-element">
+            <h6> DOUBLONS </h6>
+            <div className="toggle-lobby-container" style={{ top: 0 }}>
+              <input
+                type="checkbox"
+                id="toggle-lobby-random"
+                onClick={() => setDuplicate(!duplicate)}
+              />
+              <label
+                className="lobby-toggle-label"
+                htmlFor="toggle-lobby-random"
+              ></label>
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="lobby-screen">
-      {user ? (
-        <div className="div-lobby">
-          <div className="div-lobby--row">
-            {renderOptions()}
-            {renderUsers()}
-          </div>
+  const onReturnHome = () => {
+    window.location = '/'
+  }
 
-          <div className="lobby-start-game">
-            <button onClick={(e) => startGame(e)}> LANCER LA PARTIE </button>
-            <button onClick={(e) => copyToClipboard(e)}> INVITER </button>
+  return (
+    <>
+      <div className="lobby-screen">
+        {user && users ? (
+          <div className="div-lobby">
+            <h3 className="lobby--title" onClick={() => onReturnHome()}>
+              BLACKJACK
+            </h3>
+            <div className="lobby--container">
+              {renderOptions()}
+              {renderUsers()}
+            </div>
+
+            <div className="lobby-start-game">
+              <button onClick={(e) => startGame(e)}> LANCER LA PARTIE </button>
+              <button
+                className="lobby--invite-btn"
+                onClick={(e) => copyToClipboard(e)}
+              >
+                INVITER {invitedMessage && <span> COPIÉ </span>}
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div></div>
-      )}
-    </div>
+        ) : (
+          <div></div>
+        )}
+      </div>
+    </>
   )
 }
 
